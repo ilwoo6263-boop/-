@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0b17" />
+  <title>WISH FREQUENCY — 소원 주파수</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">✦</span><span>WISH FREQUENCY</span></div>
+      <button id="historyBtn" class="ghost-btn">기록</button>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">YOUR WISH · YOUR FREQUENCY</p>
+      <h1>당신의 소원은<br /><span>무엇인가요?</span></h1>
+      <p class="hero-copy">소원을 하나 정하고, 나만의 몰입 시간을 시작하세요.</p>
+
+      <div class="wish-box">
+        <input id="wishInput" maxlength="80" placeholder="예: 다시 연락하고 싶어" autocomplete="off" />
+        <button id="wishBtn">소원 시작하기 <span>→</span></button>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-heading">
+        <div><p class="eyebrow">DISCOVER</p><h2>오늘의 소원 주파수</h2></div>
+        <span class="live-dot">● LIVE</span>
+      </div>
+      <div id="frequencyGrid" class="frequency-grid"></div>
+    </section>
+
+    <section id="playerSection" class="player hidden">
+      <div class="player-orbit"><div class="orbit-ring"></div><div class="orbit-core" id="orbitCore">528</div></div>
+      <div class="player-info">
+        <p class="eyebrow" id="playerCategory">REUNION</p>
+        <h2 id="playerTitle">재회</h2>
+        <p id="playerDescription">마음을 가라앉히고 원하는 장면을 천천히 상상해보세요.</p>
+        <div class="frequency-value"><strong id="playerFrequency">528</strong><span>Hz</span></div>
+        <div class="timer-row"><span>남은 시간</span><strong id="timer">11:11</strong></div>
+        <div class="progress"><span id="progressBar"></span></div>
+        <div class="controls">
+          <button id="restartBtn" class="round-btn">↻</button>
+          <button id="playBtn" class="play-btn">▶</button>
+          <button id="favoriteBtn" class="round-btn">♡</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto">
+      <div><p class="eyebrow">RITUAL</p><h2>사용 방법</h2></div>
+      <div class="steps">
+        <article><span>01</span><h3>소원을 정하세요</h3><p>오늘 이루고 싶은 한 가지를 구체적으로 떠올립니다.</p></article>
+        <article><span>02</span><h3>주파수를 선택하세요</h3><p>목적에 맞는 주파수를 고르고 편안한 자세를 취합니다.</p></article>
+        <article><span>03</span><h3>몰입을 시작하세요</h3><p>호흡을 고르고 원하는 결과를 이미지로 상상합니다.</p></article>
+      </div>
+    </section>
+
+    <footer>
+      <p>※ 주파수가 실제로 소원을 이루어준다는 과학적 근거는 없습니다. 명상·몰입을 위한 엔터테인먼트 콘텐츠입니다.</p>
+      <p>WISH FREQUENCY · Make a wish. Press play. ✦</p>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
