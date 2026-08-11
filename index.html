@@ -97,6 +97,18 @@
     </footer>
   </main>
 
+  <div id="affirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="affirmWish">
+    <div class="modal-backdrop" id="affirmBackdrop"></div>
+    <div class="modal-card">
+      <span class="modal-eyebrow">✦ POSITIVE AFFIRMATION</span>
+      <h3 id="affirmWish">“소원”</h3>
+      <p class="modal-sub">아래 확언을 소리 내어 <b>3번</b> 외쳐보세요.</p>
+      <ul id="affirmList" class="affirm-list"></ul>
+      <button id="affirmReadBtn" class="affirm-read-btn">확언 외치기 <span id="affirmCount">(0/3)</span></button>
+      <button id="affirmCloseBtn" class="affirm-close-btn">마음에 새기기</button>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
   <script src="app.js"></script>
 </body>

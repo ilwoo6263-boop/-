@@ -147,6 +147,7 @@ function startWish(){
   currentWishCat = cat;
   renderWishTarot();                       // 타로 카드·해석 미리 준비 (아래 섹션)
   selectFrequency(freq.id);                // 소원 주파수로 스크롤 이동 + 재생 준비
+  showAffirmation(wish, cat);              // 소원 긍정 확언 팝업
   toast(`소원을 분석해 ${freq.title} 주파수와 타로를 준비했어요 ✦`);
 }
 
@@ -282,3 +283,54 @@ function initFortune(){
   $('luckyItem').textContent = item;
 }
 initFortune();
+
+/* ===== 소원 긍정 확언 팝업 (3번 외치기) ===== */
+const affirmations = {
+  reunion:['나는 사랑받을 자격이 충분한 사람이다.','필요한 인연은 가장 좋은 순간에 내게 돌아온다.','나는 조급함을 내려놓고 내 마음부터 편안하게 한다.'],
+  money:['나는 풍요를 누릴 자격이 있다.','기회는 언제나 나를 향해 열려 있다.','나는 매일 조금씩 더 나은 방향으로 나아간다.'],
+  love:['나는 있는 그대로 충분히 사랑스럽다.','나는 건강하고 따뜻한 사랑을 끌어당긴다.','나는 나를 아끼는 만큼 좋은 사람을 만난다.'],
+  focus:['나는 내가 원하는 것을 이룰 힘이 있다.','나는 지금 이 순간에 온전히 집중한다.','나의 노력은 반드시 좋은 결실로 돌아온다.'],
+  luck:['좋은 일이 자연스럽게 나를 찾아온다.','나는 매일 행운에 마음을 연다.','나는 준비된 사람이고, 기회를 알아본다.'],
+  general:['나는 내 소원을 이룰 자격이 있다.','나는 매일 원하는 삶에 가까워지고 있다.','내가 바라는 것은 이미 내게로 오고 있다.']
+};
+const AFFIRM_TIMES = 3;
+let affirmCount = 0;
+
+function showAffirmation(wish, cat){
+  affirmCount = 0;
+  $('affirmWish').textContent = `“${wish}”`;
+  const list = affirmations[cat] || affirmations.general;
+  $('affirmList').innerHTML = list.map(a=>`<li>${escapeHtml(a)}</li>`).join('');
+  const btn = $('affirmReadBtn');
+  btn.disabled = false;
+  btn.innerHTML = `확언 외치기 <span id="affirmCount">(0/${AFFIRM_TIMES})</span>`;
+  const modal = $('affirmModal');
+  modal.classList.remove('hidden');
+  requestAnimationFrame(()=>modal.classList.add('show'));
+}
+
+function closeAffirmation(){
+  const modal = $('affirmModal');
+  modal.classList.remove('show');
+  setTimeout(()=>modal.classList.add('hidden'), 280);
+}
+
+$('affirmReadBtn').addEventListener('click',()=>{
+  if(affirmCount >= AFFIRM_TIMES) return;
+  affirmCount++;
+  const items = $('affirmList').querySelectorAll('li');
+  items.forEach(li=>{ li.classList.remove('shout'); void li.offsetWidth; li.classList.add('shout'); });
+  if(affirmCount >= AFFIRM_TIMES){
+    items.forEach(li=>li.classList.add('read'));
+    const btn = $('affirmReadBtn');
+    btn.textContent = '확언 완성! 마음에 새겨졌어요 ✦';
+    btn.disabled = true;
+    celebrate();
+    toast('긍정 확언 3번 완료 ✦ 소원에 힘이 실렸어요');
+  } else {
+    $('affirmCount').textContent = `(${affirmCount}/${AFFIRM_TIMES})`;
+  }
+});
+$('affirmCloseBtn').addEventListener('click', closeAffirmation);
+$('affirmBackdrop').addEventListener('click', closeAffirmation);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('affirmModal').classList.contains('hidden')) closeAffirmation(); });
