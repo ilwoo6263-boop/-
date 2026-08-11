@@ -32,6 +32,7 @@ function selectFrequency(id){
   $('orbitCore').textContent = selected.hz;
   total = remaining = selected.minutes*60 + selected.seconds;
   updateTimer();
+  animateWishGauge(currentWish || selected.title);
   $('playerSection').scrollIntoView({behavior:'smooth',block:'center'});
   toast(`${selected.title} 주파수를 준비했어요 ✦`);
 }
@@ -65,7 +66,7 @@ function stopAudio(){
   if(gain && audioCtx){try{gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+.35)}catch(e){} setTimeout(()=>oscillators.forEach(o=>{try{o.stop()}catch(e){}}),400)}
   oscillators=[]; gain=null; playing=false; $('playBtn').textContent='▶';
 }
-function finishSession(){stopAudio();remaining=total;updateTimer();toast('소원 몰입 시간이 끝났어요. ✦')}
+function finishSession(){stopAudio();remaining=total;updateTimer();celebrate();toast('소원 봉인 완료 ✦ 오늘의 몰입이 끝났어요.')}
 function restart(){stopAudio();remaining=total;updateTimer();startAudio()}
 function toast(text){const t=$('toast');t.textContent=text;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
@@ -208,3 +209,76 @@ function buildWishReading(picks){
 }
 
 $('tarotDrawBtn').addEventListener('click', renderWishTarot);
+
+/* ===== 재미 요소: 성취 게이지 · 세리머니 · 오늘의 운세 ===== */
+function hashStr(s){let h=2166136261;s=String(s);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function seededPick(seed, arr){return arr[hashStr(seed)%arr.length]}
+
+// 소원 성취 기운 게이지 (소원 텍스트 기반 72~98%, 0에서 차오름)
+function animateWishGauge(seed){
+  const pct = 72 + (hashStr('gauge:'+seed) % 27); // 72~98
+  const fill = $('wishGaugeFill'), label = $('wishGaugePct');
+  fill.style.width = '0%'; label.textContent = '0%';
+  let cur = 0;
+  clearInterval(animateWishGauge._t);
+  animateWishGauge._t = setInterval(()=>{
+    cur += Math.max(1, Math.round((pct-cur)/6));
+    if(cur >= pct){ cur = pct; clearInterval(animateWishGauge._t); }
+    fill.style.width = cur+'%'; label.textContent = cur+'%';
+  }, 28);
+}
+
+// 완료 세리머니 (별가루/컨페티)
+function celebrate(){
+  const colors = ['#b79cff','#78d7ff','#ff8fba','#e8c86b','#79e6a0','#ffffff'];
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti-wrap';
+  for(let i=0;i<90;i++){
+    const c = document.createElement('i');
+    c.style.left = Math.random()*100 + '%';
+    c.style.background = colors[i % colors.length];
+    c.style.animationDelay = (Math.random()*0.7) + 's';
+    c.style.animationDuration = (2.4 + Math.random()*1.8) + 's';
+    if(i % 4 === 0) c.classList.add('spark');
+    wrap.appendChild(c);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(()=>wrap.remove(), 4600);
+}
+
+// 오늘의 운세 (날짜 기반 → 하루 동안 고정)
+const fortunes = [
+  '오늘은 마음먹은 일이 뜻밖의 도움을 받는 날이에요.',
+  '작은 용기가 큰 변화를 부르는 하루입니다.',
+  '기다리던 소식이 슬며시 다가오고 있어요.',
+  '오늘의 미소가 행운의 문을 엽니다.',
+  '서두르지 않으면 원하는 것이 제자리를 찾아와요.',
+  '누군가의 진심이 당신에게 닿는 하루예요.',
+  '잠시 멈춰 숨을 고르면 길이 또렷해집니다.',
+  '오늘 내민 손이 좋은 인연으로 돌아와요.',
+  '마음속 소원에 한 걸음 가까워지는 날이에요.',
+  '작은 정리 하나가 큰 행운의 자리를 만듭니다.',
+  '오늘은 직감을 믿어도 좋은 날이에요.',
+  '예상 못한 곳에서 반가운 기회가 반짝입니다.'
+];
+const luckyColors = [
+  {name:'라벤더', hex:'#b79cff'}, {name:'딥블루', hex:'#5b8cff'}, {name:'로즈핑크', hex:'#ff8fba'},
+  {name:'민트', hex:'#79e6a0'}, {name:'골드', hex:'#e8c86b'}, {name:'실버', hex:'#cfd3e6'},
+  {name:'코랄', hex:'#ff9f7a'}, {name:'퍼플', hex:'#9c78ff'}
+];
+const luckyItems = ['향초','작은 거울','손편지','따뜻한 차','반지','노트','이어폰','꽃 한 송이','작은 돌','열쇠고리','목걸이','책갈피'];
+
+function initFortune(){
+  const d = new Date();
+  const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  const f = seededPick('fortune:'+key, fortunes);
+  const color = seededPick('color:'+key, luckyColors);
+  const num = (hashStr('num:'+key) % 9) + 1;
+  const item = seededPick('item:'+key, luckyItems);
+  $('fortuneText').textContent = f;
+  $('luckyColor').textContent = color.name;
+  $('luckyColorDot').style.background = color.hex;
+  $('luckyNumber').textContent = num;
+  $('luckyItem').textContent = item;
+}
+initFortune();
