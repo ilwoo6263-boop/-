@@ -105,7 +105,7 @@ const tarotDeck = [
 ];
 const tarotPositions = ['과거','현재','미래'];
 const tarotBoard = $('tarotBoard');
-let currentWish = '', currentWishCat = 'general';
+let currentWish = '', currentWishCat = 'general', lastTarotPicks = [];
 
 // 소원 → 카테고리/추천 주파수 판별
 function detectWishCategory(text){
@@ -153,6 +153,7 @@ function startWish(){
 
 function renderWishTarot(){
   const picks = shuffle(tarotDeck).slice(0,3).map(card=>({card, reversed: Math.random()<0.3}));
+  lastTarotPicks = picks;
   tarotBoard.className = 'tarot-board count-3';
   tarotBoard.innerHTML = picks.map((p,i)=>`
     <div class="tarot-slot">
@@ -174,6 +175,7 @@ function renderWishTarot(){
   $('tarotGuide').innerHTML = `“<b>${escapeHtml(currentWish)}</b>” 에 대한 과거·현재·미래 3장의 카드입니다.`;
   $('tarotDrawBtn').classList.remove('hidden');
   $('tarotDrawBtn').textContent = '다시 뽑기 ✦';
+  $('talismanBtn').classList.remove('hidden');
   buildWishReading(picks);
 }
 
@@ -333,4 +335,79 @@ $('affirmReadBtn').addEventListener('click',()=>{
 });
 $('affirmCloseBtn').addEventListener('click', closeAffirmation);
 $('affirmBackdrop').addEventListener('click', closeAffirmation);
-document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('affirmModal').classList.contains('hidden')) closeAffirmation(); });
+
+/* ===== 소원 부적 카드 (캔버스 → PNG 저장) ===== */
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function wrapText(ctx,text,maxW){const lines=[];let line='';for(const ch of [...text]){if(line && ctx.measureText(line+ch).width>maxW){lines.push(line);line=ch;}else line+=ch;}if(line)lines.push(line);return lines;}
+
+async function generateTalisman(){
+  const wish = currentWish || '나의 소원';
+  const {freq} = detectWishCategory(wish);
+  const picks = lastTarotPicks.length ? lastTarotPicks : shuffle(tarotDeck).slice(0,3).map(c=>({card:c,reversed:false}));
+  const KR = "'Noto Sans KR','Malgun Gothic',sans-serif";
+  const S=2, W=600, H=700;
+  const cv=document.createElement('canvas'); cv.width=W*S; cv.height=H*S;
+  const ctx=cv.getContext('2d'); ctx.scale(S,S); ctx.textAlign='center';
+  try{ await Promise.race([Promise.all([document.fonts.load(`800 30px "Noto Sans KR"`),document.fonts.load(`500 12px "Noto Sans KR"`)]), new Promise(r=>setTimeout(r,800))]); }catch(e){}
+  // 배경
+  const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#241d3d'); g.addColorStop(.55,'#14111f'); g.addColorStop(1,'#0b0a14');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const glow=(x,y,r,color,a)=>{const rg=ctx.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,color);rg.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=a;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.globalAlpha=1;};
+  glow(120,150,280,'#9c78ff',.5); glow(490,600,300,'#46d5ff',.3);
+  // 테두리
+  ctx.strokeStyle='rgba(183,156,255,.55)'; ctx.lineWidth=2; roundRect(ctx,24,24,W-48,H-48,26); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1; roundRect(ctx,36,36,W-72,H-72,20); ctx.stroke();
+  // 제목 / 날짜
+  ctx.fillStyle='#e7ddff'; ctx.font=`800 15px ${KR}`; ctx.fillText('✦   소   원   부   적   ✦', W/2, 90);
+  const d=new Date(); const ds=`${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}`;
+  ctx.fillStyle='#a7a3b7'; ctx.font=`500 12px ${KR}`; ctx.fillText(ds, W/2, 114);
+  // 소원
+  ctx.fillStyle='#ffffff'; ctx.font=`700 30px ${KR}`;
+  let wy=196; wrapText(ctx,`“${wish}”`, W-150).slice(0,3).forEach(l=>{ ctx.fillText(l, W/2, wy); wy+=42; });
+  // 구분선
+  wy+=8; ctx.strokeStyle='rgba(255,255,255,.14)'; ctx.beginPath(); ctx.moveTo(96,wy); ctx.lineTo(W-96,wy); ctx.stroke();
+  // 주파수
+  wy+=42; ctx.fillStyle='#b79cff'; ctx.font=`800 12px ${KR}`; ctx.fillText('소원 주파수', W/2, wy-20);
+  ctx.fillStyle='#ffffff'; ctx.font=`800 32px ${KR}`; ctx.fillText(`${freq.title}  ${freq.hz}Hz`, W/2, wy+12);
+  // 타로 3장
+  const cardW=132, cardH=188, gap=22, totalW=cardW*3+gap*2, sx=(W-totalW)/2, cyTop=wy+50;
+  picks.forEach((p,i)=>{
+    const x=sx+i*(cardW+gap);
+    ctx.fillStyle='rgba(255,255,255,.05)'; ctx.strokeStyle='rgba(183,156,255,.4)'; ctx.lineWidth=1.5;
+    roundRect(ctx,x,cyTop,cardW,cardH,14); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#c9b6ff'; ctx.font=`700 11px ${KR}`; ctx.fillText(tarotPositions[i], x+cardW/2, cyTop+26);
+    ctx.font=`400 46px ${KR}`;
+    if(p.reversed){ ctx.save(); ctx.translate(x+cardW/2, cyTop+cardH/2-4); ctx.rotate(Math.PI); ctx.fillText(p.card.symbol,0,16); ctx.restore(); }
+    else ctx.fillText(p.card.symbol, x+cardW/2, cyTop+cardH/2+10);
+    ctx.fillStyle='#ffffff'; ctx.font=`700 15px ${KR}`; ctx.fillText(p.card.name, x+cardW/2, cyTop+cardH-38);
+    ctx.fillStyle='#a7a3b7'; ctx.font=`500 10px ${KR}`; ctx.fillText(p.reversed?'역방향':'정방향', x+cardW/2, cyTop+cardH-20);
+  });
+  // 축원 문구 / 로고
+  const by=cyTop+cardH+58;
+  ctx.fillStyle='#d4ccff'; ctx.font=`600 14px ${KR}`;
+  wrapText(ctx,'이 부적에 담긴 기운이 당신의 소원을 지켜주기를.', W-150).forEach((l,i)=>ctx.fillText(l, W/2, by+i*24));
+  ctx.fillStyle='#706d7e'; ctx.font=`800 11px ${KR}`; ctx.fillText('WISH FREQUENCY · Make a wish ✦', W/2, H-52);
+  return cv.toDataURL('image/png');
+}
+
+async function openTalisman(){
+  const btn=$('talismanBtn'); const label=btn.textContent; btn.textContent='부적 만드는 중…'; btn.disabled=true;
+  try{
+    const url=await generateTalisman();
+    $('talismanImg').src=url;
+    const dl=$('talismanDownload'); dl.href=url;
+    const d=new Date(); dl.download=`소원부적_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.png`;
+    const m=$('talismanModal'); m.classList.remove('hidden'); requestAnimationFrame(()=>m.classList.add('show'));
+  }catch(e){ toast('부적 생성 중 문제가 생겼어요.'); }
+  btn.textContent=label; btn.disabled=false;
+}
+function closeTalisman(){ const m=$('talismanModal'); m.classList.remove('show'); setTimeout(()=>m.classList.add('hidden'),280); }
+
+$('talismanBtn').addEventListener('click', openTalisman);
+$('talismanCloseBtn').addEventListener('click', closeTalisman);
+$('talismanBackdrop').addEventListener('click', closeTalisman);
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape') return;
+  if(!$('affirmModal').classList.contains('hidden')) closeAffirmation();
+  if(!$('talismanModal').classList.contains('hidden')) closeTalisman();
+});

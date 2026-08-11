@@ -78,6 +78,7 @@
       <div id="tarotBoard" class="tarot-board count-3"></div>
       <div class="tarot-actions">
         <button id="tarotDrawBtn" class="tarot-draw-btn hidden">다시 뽑기 ✦</button>
+        <button id="talismanBtn" class="talisman-btn hidden">🔮 소원 부적 카드 만들기</button>
       </div>
       <div id="tarotReading" class="tarot-reading hidden"></div>
     </section>
@@ -106,6 +107,16 @@
       <ul id="affirmList" class="affirm-list"></ul>
       <button id="affirmReadBtn" class="affirm-read-btn">확언 외치기 <span id="affirmCount">(0/3)</span></button>
       <button id="affirmCloseBtn" class="affirm-close-btn">마음에 새기기</button>
+    </div>
+  </div>
+
+  <div id="talismanModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="talismanBackdrop"></div>
+    <div class="modal-card talisman-modal-card">
+      <span class="modal-eyebrow">✦ WISH TALISMAN</span>
+      <img id="talismanImg" class="talisman-img" alt="소원 부적 카드" />
+      <a id="talismanDownload" class="affirm-read-btn talisman-save" download>이미지 저장하기 ⬇</a>
+      <button id="talismanCloseBtn" class="affirm-close-btn">닫기</button>
     </div>
   </div>
 
