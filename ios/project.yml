@@ -1,0 +1,29 @@
+# XcodeGen 스펙 — Mac에서 `xcodegen generate` 실행하면 WishFrequency.xcodeproj 가 생성됩니다.
+# (설치: brew install xcodegen)
+name: WishFrequency
+options:
+  bundleIdPrefix: com.wishfrequency
+  deploymentTarget:
+    iOS: "14.0"
+  createIntermediateGroups: true
+
+targets:
+  WishFrequency:
+    type: application
+    platform: iOS
+    sources:
+      - path: WishFrequency
+      # 공유 웹앱(../web)을 폴더 참조로 번들에 포함 → 앱 번들 안에 "web/" 로 복사됨
+      - path: ../web
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wishfrequency.app
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_FILE: WishFrequency/Info.plist
+        TARGETED_DEVICE_FAMILY: "1"        # iPhone 전용
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: NO

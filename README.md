@@ -29,6 +29,13 @@
 │           │   └── WebAppBridge.kt   # 공유/저장 네이티브 브리지
 │           └── res/…                 # 아이콘·테마·문자열
 │
+├── ios/                        # iOS 앱 (Mac + Xcode 필요)
+│   ├── project.yml             # XcodeGen 스펙 → .xcodeproj 생성
+│   └── WishFrequency/
+│       ├── AppDelegate.swift
+│       ├── WebViewController.swift  # WKWebView + 공유/저장 브리지
+│       └── Info.plist
+│
 ├── README.md
 └── .gitignore
 ```
@@ -82,6 +89,30 @@ cd android
 ### 주요 설정
 - `applicationId` : `com.wishfrequency.app` (스토어 등록 시 원하는 값으로 변경)
 - `minSdk 26` (Android 8.0+) · `targetSdk 34` · `versionCode/Name` 은 `android/app/build.gradle`
+
+## iOS 앱 빌드 (App Store 업로드용)
+
+> ⚠️ iOS 앱은 **Mac + Xcode**가 필수입니다. (Windows 에서는 코드 수정만 가능, 빌드/실행/업로드 불가)
+> App Store 출시에는 **Apple Developer Program(연 $99)** 도 필요합니다.
+> 안드로이드와 동일하게 `web/` 를 WKWebView 로 감싼 앱이며, 웹 코드를 공유합니다.
+
+Mac 에서:
+
+1. XcodeGen 설치 후 프로젝트 생성 (`.xcodeproj` 는 스펙에서 생성):
+   ```bash
+   brew install xcodegen
+   cd ios
+   xcodegen generate
+   open WishFrequency.xcodeproj
+   ```
+2. Xcode 에서 서명 팀(Signing & Capabilities → Team)을 본인 Apple 계정으로 지정
+3. 시뮬레이터/실기기에서 **Run ▶**
+4. 출시: `Product → Archive → Distribute App` 으로 App Store Connect 에 업로드
+
+> 아이콘: `Assets.xcassets` 의 AppIcon 에 1024×1024 PNG 를 추가하면 됩니다. (없어도 시뮬레이터 실행은 가능)
+
+### Mac 이 없다면
+- 클라우드 Mac(MacinCloud 등) 임대, 또는 GitHub Actions 의 `macos` 러너/CI 로 빌드하는 방법이 있습니다.
 
 ## 다음 개발 단계
 

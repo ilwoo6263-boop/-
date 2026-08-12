@@ -4,6 +4,33 @@
  * ======================================================= */
 
 const $ = id => document.getElementById(id);
+
+/* ===== 네이티브 브리지 (안드로이드 / iOS 공용) =====
+ * 앱(WebView/WKWebView)에서 실행되면 네이티브 공유·저장을 사용하고,
+ * 일반 브라우저에서는 available=false 라서 웹 기본 동작으로 폴백된다. */
+const Native = (function(){
+  const android = window.AndroidBridge;                                  // 안드로이드
+  const ios = (window.webkit && window.webkit.messageHandlers) || null;  // iOS(WKWebView)
+  const iosHas = name => ios && ios[name];
+  return {
+    available: !!(android || ios),
+    shareText(text){
+      if(android && android.shareText){ android.shareText(text); return true; }
+      if(iosHas('shareText')){ ios.shareText.postMessage(text); return true; }
+      return false;
+    },
+    shareImage(dataUrl, text){
+      if(android && android.shareImage){ android.shareImage(dataUrl, text); return true; }
+      if(iosHas('shareImage')){ ios.shareImage.postMessage({dataUrl, text}); return true; }
+      return false;
+    },
+    saveImage(dataUrl){
+      if(android && android.saveImage){ android.saveImage(dataUrl); return true; }
+      if(iosHas('saveImage')){ ios.saveImage.postMessage(dataUrl); return true; }
+      return false;
+    }
+  };
+})();
 const grid = $('frequencyGrid');
 let selected = frequencies[0];
 let audioCtx = null, oscillators = [], gain = null, timerId = null, remaining = 0, total = 0, playing = false;
@@ -339,9 +366,9 @@ $('talismanBtn').addEventListener('click', openTalisman);
 $('talismanCloseBtn').addEventListener('click', closeTalisman);
 $('talismanBackdrop').addEventListener('click', closeTalisman);
 $('talismanShare').addEventListener('click', shareTalisman);
-// 안드로이드에서는 <a download>가 동작하지 않으므로 네이티브 저장으로 대체
+// 앱(WebView/WKWebView)에서는 <a download>가 동작하지 않으므로 네이티브 저장으로 대체
 $('talismanDownload').addEventListener('click', e=>{
-  if(window.AndroidBridge && AndroidBridge.saveImage){ e.preventDefault(); AndroidBridge.saveImage($('talismanImg').src); toast('갤러리에 저장 중… ✦'); }
+  if(Native.saveImage($('talismanImg').src)){ e.preventDefault(); toast('이미지를 저장 중… ✦'); }
 });
 
 /* ===== 배경 사운드 믹스 (Web Audio로 실시간 생성) ===== */
@@ -412,7 +439,7 @@ function buildShareText(){
 }
 async function shareWish(){
   const text=buildShareText();
-  if(window.AndroidBridge && AndroidBridge.shareText){ AndroidBridge.shareText(text); return; }  // 안드로이드 네이티브 공유
+  if(Native.shareText(text)) return;  // 앱(안드로이드/iOS) 네이티브 공유
   try{
     if(navigator.share){ await navigator.share({title:'WISH FREQUENCY', text}); }
     else { await navigator.clipboard.writeText(text); toast('공유 문구를 복사했어요 ✦'); }
@@ -424,7 +451,7 @@ async function shareWish(){
 }
 async function shareTalisman(){
   const url=$('talismanImg').src; const text=buildShareText();
-  if(window.AndroidBridge && AndroidBridge.shareImage){ AndroidBridge.shareImage(url, text); return; }  // 안드로이드 네이티브 이미지 공유
+  if(Native.shareImage(url, text)) return;  // 앱(안드로이드/iOS) 네이티브 이미지 공유
   try{
     const blob=await (await fetch(url)).blob();
     const file=new File([blob],'소원부적.png',{type:'image/png'});

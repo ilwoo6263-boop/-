@@ -11,6 +11,15 @@ android/app/src/main/assets/www/
 *.iml
 .gradle/
 
+# ── iOS ──────────────────────────────────
+# XcodeGen 이 생성하는 프로젝트 (원본은 project.yml)
+ios/WishFrequency.xcodeproj/
+ios/build/
+ios/DerivedData/
+ios/Pods/
+*.xcuserstate
+xcuserdata/
+
 # ── Web / Node ───────────────────────────
 node_modules/
 
