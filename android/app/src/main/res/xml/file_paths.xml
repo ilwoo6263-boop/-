@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 공유용 임시 이미지가 저장되는 cache/shared 경로 -->
+    <cache-path name="shared" path="shared/" />
+</paths>

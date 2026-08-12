@@ -1,0 +1,22 @@
+# ── Android ──────────────────────────────
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+android/.cxx/
+# 빌드 시 ../web 에서 복사되는 산출물 (원본은 /web)
+android/app/src/main/assets/www/
+*.iml
+.gradle/
+
+# ── Web / Node ───────────────────────────
+node_modules/
+
+# ── 로컬 도구 / 임시 ─────────────────────
+.claude/launch.json
+
+# ── OS / 에디터 ──────────────────────────
+.DS_Store
+Thumbs.db

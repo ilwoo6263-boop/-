@@ -1,11 +1,7 @@
-const frequencies = [
-  {id:'reunion',icon:'💕',title:'재회',category:'REUNION',hz:528,minutes:11,seconds:11,desc:'마음을 가라앉히고 원하는 만남의 장면을 천천히 상상해보세요.',glow:'#b99aff'},
-  {id:'money',icon:'💰',title:'재물',category:'ABUNDANCE',hz:888,minutes:8,seconds:8,desc:'풍요로운 미래를 구체적으로 떠올리며 집중해보세요.',glow:'#e8c86b'},
-  {id:'love',icon:'❤️',title:'사랑',category:'LOVE',hz:639,minutes:6,seconds:39,desc:'따뜻하고 건강한 관계에 대한 이미지를 마음속에 그려보세요.',glow:'#ff8fba'},
-  {id:'luck',icon:'🍀',title:'행운',category:'LUCK',hz:777,minutes:7,seconds:7,desc:'오늘 원하는 기회를 떠올리고 긍정적인 감각에 집중합니다.',glow:'#79e6a0'},
-  {id:'focus',icon:'🧠',title:'집중',category:'FOCUS',hz:40,minutes:15,seconds:0,desc:'주변의 방해를 내려놓고 지금 해야 할 한 가지에 집중합니다.',glow:'#78d7ff'},
-  {id:'dino',icon:'🦖',title:'티라노사우르스',category:'T-REX',hz:999,minutes:3,seconds:33,desc:'상상력을 위한 유쾌한 인터넷 밈 스타일의 주파수입니다.',glow:'#a7ff79'}
-];
+/* =========================================================
+ * WISH FREQUENCY · 앱 로직 (app.js)
+ * 정적 데이터(frequencies, tarotDeck, affirmations 등)는 data.js에 있습니다.
+ * ======================================================= */
 
 const $ = id => document.getElementById(id);
 const grid = $('frequencyGrid');
@@ -79,31 +75,6 @@ $('historyBtn').addEventListener('click',()=>toast('청취 기록 기능은 다�
 renderCards();
 
 /* ===== 소원 타로 (메이저 아르카나 22장 · 과거·현재·미래 3장 스프레드) ===== */
-const tarotDeck = [
-  {no:0, symbol:'🃏', name:'바보', en:'The Fool', up:'새로운 시작, 자유로운 모험, 순수한 도전', rev:'무모함, 준비 부족, 경솔한 결정'},
-  {no:1, symbol:'🪄', name:'마법사', en:'The Magician', up:'창조력, 강한 의지, 자원을 다루는 능력', rev:'미숙함, 조작, 자신감 부족'},
-  {no:2, symbol:'🌙', name:'여사제', en:'The High Priestess', up:'직관, 내면의 지혜, 숨겨진 가능성', rev:'혼란, 억눌린 감정, 비밀'},
-  {no:3, symbol:'👑', name:'여황제', en:'The Empress', up:'풍요, 사랑, 창조와 결실', rev:'과잉 의존, 정체, 자기소홀'},
-  {no:4, symbol:'🏛️', name:'황제', en:'The Emperor', up:'안정, 리더십, 질서와 책임', rev:'독선, 완고함, 통제욕'},
-  {no:5, symbol:'📜', name:'교황', en:'The Hierophant', up:'전통, 조언, 신뢰할 조력자', rev:'형식주의, 반항, 고정관념'},
-  {no:6, symbol:'💞', name:'연인', en:'The Lovers', up:'사랑, 조화, 중요한 선택', rev:'갈등, 유혹, 가치관 충돌'},
-  {no:7, symbol:'🏇', name:'전차', en:'The Chariot', up:'추진력, 승리, 목표를 향한 돌파', rev:'조급함, 방향 상실, 통제 실패'},
-  {no:8, symbol:'🦁', name:'힘', en:'Strength', up:'용기, 인내, 부드러운 내면의 힘', rev:'자신감 부족, 감정 소진, 조급함'},
-  {no:9, symbol:'🏮', name:'은둔자', en:'The Hermit', up:'성찰, 내면 탐색, 지혜로운 거리두기', rev:'고립, 외로움, 회피'},
-  {no:10, symbol:'🎡', name:'운명의 수레바퀴', en:'Wheel of Fortune', up:'전환점, 행운의 흐름, 변화의 기회', rev:'정체, 불운, 흐름 거스르기'},
-  {no:11, symbol:'⚖️', name:'정의', en:'Justice', up:'균형, 공정한 결과, 명확한 판단', rev:'불공정, 편향, 책임 회피'},
-  {no:12, symbol:'🙃', name:'매달린 사람', en:'The Hanged Man', up:'관점의 전환, 잠시 멈춤, 새로운 깨달음', rev:'헛된 희생, 정체, 우유부단'},
-  {no:13, symbol:'🦋', name:'죽음', en:'Death', up:'끝과 새로운 시작, 근본적 변화', rev:'변화에 대한 저항, 미련, 지연'},
-  {no:14, symbol:'🌊', name:'절제', en:'Temperance', up:'조화, 균형, 인내로운 중용', rev:'불균형, 과함, 조급함'},
-  {no:15, symbol:'😈', name:'악마', en:'The Devil', up:'욕망, 집착, 벗어나야 할 속박', rev:'해방, 굴레 끊기, 자각'},
-  {no:16, symbol:'🗼', name:'탑', en:'The Tower', up:'급격한 변화, 낡은 것의 붕괴, 각성', rev:'위기 모면, 변화의 지연, 두려움'},
-  {no:17, symbol:'⭐', name:'별', en:'The Star', up:'희망, 영감, 치유와 회복', rev:'실망, 자신감 상실, 방향 흐림'},
-  {no:18, symbol:'🌕', name:'달', en:'The Moon', up:'불안, 상상, 드러나지 않은 진실', rev:'혼란 해소, 진실이 드러남, 안정'},
-  {no:19, symbol:'☀️', name:'태양', en:'The Sun', up:'성공, 기쁨, 밝은 에너지와 활력', rev:'일시적 지연, 과열, 낙관의 과함'},
-  {no:20, symbol:'📯', name:'심판', en:'Judgement', up:'각성, 결단, 새로운 부름', rev:'후회, 자기 비판, 결정 회피'},
-  {no:21, symbol:'🌍', name:'세계', en:'The World', up:'완성, 성취, 하나의 여정의 결실', rev:'미완성, 마무리 지연, 아쉬움'}
-];
-const tarotPositions = ['과거','현재','미래'];
 const tarotBoard = $('tarotBoard');
 let currentWish = '', currentWishCat = 'general', lastTarotPicks = [];
 
@@ -123,16 +94,6 @@ const posFrame = {
   '과거':(c,m)=>`이 소원이 시작된 배경에는 ‘${m}’의 기운이 자리합니다. <b>${c.name}</b> 카드는 지난 시간 당신의 마음속에 쌓여온 흐름과, 지금의 바람이 생겨난 뿌리를 비춰줍니다.`,
   '현재':(c,m)=>`지금 이 순간의 핵심은 ‘${m}’입니다. <b>${c.name}</b> 카드는 소원을 향한 현재의 에너지와, 당신이 마주한 상황에서 가장 먼저 다뤄야 할 열쇠를 가리킵니다.`,
   '미래':(c,m)=>`이대로 나아간다면 ‘${m}’의 방향으로 흐름이 이어집니다. <b>${c.name}</b> 카드는 앞으로 다가올 가능성과, 그 결과를 좋은 쪽으로 이끌기 위해 준비할 마음가짐을 알려줍니다.`
-};
-
-// 소원 카테고리별 맞춤 조언
-const wishAdvice = {
-  reunion:'재회는 조급하게 다가가기보다 먼저 당신의 마음을 안정시키는 데서 다시 이어질 길이 열립니다. 연락은 감정이 가라앉은 뒤, 짧고 진심을 담아 건네보세요.',
-  money:'재물의 기회는 무리한 욕심보다 꾸준함과 타이밍에서 옵니다. 지금은 큰 결정을 서두르기보다 기반을 다지고 정보를 모으며 준비할 때입니다.',
-  love:'사랑은 상대를 바꾸려 애쓰기보다, 당신이 편안하고 빛나는 상태일 때 자연스럽게 다가옵니다. 마음을 열되 자신을 잃지 마세요.',
-  focus:'집중과 성취는 완벽함이 아니라 지금 한 가지에 몰입하는 데서 시작됩니다. 방해 요소를 정리하고 오늘 할 일에 마음을 모으세요.',
-  luck:'행운은 준비된 사람에게 흐릅니다. 작은 시도와 긍정적인 태도가 뜻밖의 기회를 불러올 거예요.',
-  general:'소원을 이루는 열쇠는 마음의 방향을 분명히 하는 데 있습니다. 조급함을 내려놓고 지금 할 수 있는 한 걸음에 집중해보세요.'
 };
 
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -249,28 +210,7 @@ function celebrate(){
   setTimeout(()=>wrap.remove(), 4600);
 }
 
-// 오늘의 운세 (날짜 기반 → 하루 동안 고정)
-const fortunes = [
-  '오늘은 마음먹은 일이 뜻밖의 도움을 받는 날이에요.',
-  '작은 용기가 큰 변화를 부르는 하루입니다.',
-  '기다리던 소식이 슬며시 다가오고 있어요.',
-  '오늘의 미소가 행운의 문을 엽니다.',
-  '서두르지 않으면 원하는 것이 제자리를 찾아와요.',
-  '누군가의 진심이 당신에게 닿는 하루예요.',
-  '잠시 멈춰 숨을 고르면 길이 또렷해집니다.',
-  '오늘 내민 손이 좋은 인연으로 돌아와요.',
-  '마음속 소원에 한 걸음 가까워지는 날이에요.',
-  '작은 정리 하나가 큰 행운의 자리를 만듭니다.',
-  '오늘은 직감을 믿어도 좋은 날이에요.',
-  '예상 못한 곳에서 반가운 기회가 반짝입니다.'
-];
-const luckyColors = [
-  {name:'라벤더', hex:'#b79cff'}, {name:'딥블루', hex:'#5b8cff'}, {name:'로즈핑크', hex:'#ff8fba'},
-  {name:'민트', hex:'#79e6a0'}, {name:'골드', hex:'#e8c86b'}, {name:'실버', hex:'#cfd3e6'},
-  {name:'코랄', hex:'#ff9f7a'}, {name:'퍼플', hex:'#9c78ff'}
-];
-const luckyItems = ['향초','작은 거울','손편지','따뜻한 차','반지','노트','이어폰','꽃 한 송이','작은 돌','열쇠고리','목걸이','책갈피'];
-
+// 오늘의 운세 (날짜 기반 → 하루 동안 고정, 데이터는 data.js)
 function initFortune(){
   const d = new Date();
   const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
@@ -286,15 +226,7 @@ function initFortune(){
 }
 initFortune();
 
-/* ===== 소원 긍정 확언 팝업 (3번 외치기) ===== */
-const affirmations = {
-  reunion:['나는 사랑받을 자격이 충분한 사람이다.','필요한 인연은 가장 좋은 순간에 내게 돌아온다.','나는 조급함을 내려놓고 내 마음부터 편안하게 한다.'],
-  money:['나는 풍요를 누릴 자격이 있다.','기회는 언제나 나를 향해 열려 있다.','나는 매일 조금씩 더 나은 방향으로 나아간다.'],
-  love:['나는 있는 그대로 충분히 사랑스럽다.','나는 건강하고 따뜻한 사랑을 끌어당긴다.','나는 나를 아끼는 만큼 좋은 사람을 만난다.'],
-  focus:['나는 내가 원하는 것을 이룰 힘이 있다.','나는 지금 이 순간에 온전히 집중한다.','나의 노력은 반드시 좋은 결실로 돌아온다.'],
-  luck:['좋은 일이 자연스럽게 나를 찾아온다.','나는 매일 행운에 마음을 연다.','나는 준비된 사람이고, 기회를 알아본다.'],
-  general:['나는 내 소원을 이룰 자격이 있다.','나는 매일 원하는 삶에 가까워지고 있다.','내가 바라는 것은 이미 내게로 오고 있다.']
-};
+/* ===== 소원 긍정 확언 팝업 (3번 외치기, affirmations 데이터는 data.js) ===== */
 const AFFIRM_TIMES = 3;
 let affirmCount = 0;
 
@@ -407,6 +339,10 @@ $('talismanBtn').addEventListener('click', openTalisman);
 $('talismanCloseBtn').addEventListener('click', closeTalisman);
 $('talismanBackdrop').addEventListener('click', closeTalisman);
 $('talismanShare').addEventListener('click', shareTalisman);
+// 안드로이드에서는 <a download>가 동작하지 않으므로 네이티브 저장으로 대체
+$('talismanDownload').addEventListener('click', e=>{
+  if(window.AndroidBridge && AndroidBridge.saveImage){ e.preventDefault(); AndroidBridge.saveImage($('talismanImg').src); toast('갤러리에 저장 중… ✦'); }
+});
 
 /* ===== 배경 사운드 믹스 (Web Audio로 실시간 생성) ===== */
 let ambientSource=null, ambientLFO=null, ambientGainNode=null, currentAmbient='none', ambientVol=0.45;
@@ -476,6 +412,7 @@ function buildShareText(){
 }
 async function shareWish(){
   const text=buildShareText();
+  if(window.AndroidBridge && AndroidBridge.shareText){ AndroidBridge.shareText(text); return; }  // 안드로이드 네이티브 공유
   try{
     if(navigator.share){ await navigator.share({title:'WISH FREQUENCY', text}); }
     else { await navigator.clipboard.writeText(text); toast('공유 문구를 복사했어요 ✦'); }
@@ -487,6 +424,7 @@ async function shareWish(){
 }
 async function shareTalisman(){
   const url=$('talismanImg').src; const text=buildShareText();
+  if(window.AndroidBridge && AndroidBridge.shareImage){ AndroidBridge.shareImage(url, text); return; }  // 안드로이드 네이티브 이미지 공유
   try{
     const blob=await (await fetch(url)).blob();
     const file=new File([blob],'소원부적.png',{type:'image/png'});
