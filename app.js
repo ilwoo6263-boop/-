@@ -66,7 +66,7 @@ function stopAudio(){
   if(gain && audioCtx){try{gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+.35)}catch(e){} setTimeout(()=>oscillators.forEach(o=>{try{o.stop()}catch(e){}}),400)}
   oscillators=[]; gain=null; playing=false; $('playBtn').textContent='▶';
 }
-function finishSession(){stopAudio();remaining=total;updateTimer();celebrate();toast('소원 봉인 완료 ✦ 오늘의 몰입이 끝났어요.')}
+function finishSession(){stopAudio();stopAmbient();remaining=total;updateTimer();celebrate();toast('소원 봉인 완료 ✦ 오늘의 몰입이 끝났어요.')}
 function restart(){stopAudio();remaining=total;updateTimer();startAudio()}
 function toast(text){const t=$('toast');t.textContent=text;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
@@ -406,6 +406,101 @@ function closeTalisman(){ const m=$('talismanModal'); m.classList.remove('show')
 $('talismanBtn').addEventListener('click', openTalisman);
 $('talismanCloseBtn').addEventListener('click', closeTalisman);
 $('talismanBackdrop').addEventListener('click', closeTalisman);
+$('talismanShare').addEventListener('click', shareTalisman);
+
+/* ===== 배경 사운드 믹스 (Web Audio로 실시간 생성) ===== */
+let ambientSource=null, ambientLFO=null, ambientGainNode=null, currentAmbient='none', ambientVol=0.45;
+
+function makeNoiseBuffer(ctx, kind){
+  const len=Math.floor(ctx.sampleRate*2.2);
+  const buf=ctx.createBuffer(1,len,ctx.sampleRate);
+  const d=buf.getChannelData(0);
+  if(kind==='brown'){let last=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+0.02*w)/1.02;d[i]=last*3.2;}}
+  else {for(let i=0;i<len;i++) d[i]=Math.random()*2-1;}
+  return buf;
+}
+function ambientTargetGain(){ return ambientVol*0.32; }
+
+async function setAmbient(type){
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  await audioCtx.resume();
+  if(ambientSource){ try{ambientSource.stop()}catch(e){} ambientSource=null; }
+  if(ambientLFO){ try{ambientLFO.stop()}catch(e){} ambientLFO=null; }
+  currentAmbient = type;
+  document.querySelectorAll('.mix-btn').forEach(b=>b.classList.toggle('active', b.dataset.amb===type));
+  if(type==='none') return;
+  if(!ambientGainNode){ ambientGainNode=audioCtx.createGain(); ambientGainNode.connect(audioCtx.destination); }
+  ambientGainNode.gain.value = ambientTargetGain();
+  const src=audioCtx.createBufferSource();
+  src.buffer=makeNoiseBuffer(audioCtx, type==='waves'?'brown':'white');
+  src.loop=true;
+  const filter=audioCtx.createBiquadFilter();
+  if(type==='rain'){
+    filter.type='bandpass'; filter.frequency.value=1400; filter.Q.value=0.6;
+    src.connect(filter).connect(ambientGainNode);
+  } else if(type==='waves'){
+    filter.type='lowpass'; filter.frequency.value=600;
+    const swell=audioCtx.createGain(); swell.gain.value=1;
+    ambientLFO=audioCtx.createOscillator(); ambientLFO.type='sine'; ambientLFO.frequency.value=0.12;
+    const depth=audioCtx.createGain(); depth.gain.value=0.6;
+    ambientLFO.connect(depth).connect(swell.gain);
+    src.connect(filter).connect(swell).connect(ambientGainNode);
+    ambientLFO.start();
+  } else { // 화이트노이즈 (부드럽게)
+    filter.type='lowpass'; filter.frequency.value=8000;
+    src.connect(filter).connect(ambientGainNode);
+  }
+  src.start();
+  ambientSource=src;
+}
+function stopAmbient(){
+  if(ambientSource){ try{ambientSource.stop()}catch(e){} ambientSource=null; }
+  if(ambientLFO){ try{ambientLFO.stop()}catch(e){} ambientLFO=null; }
+  currentAmbient='none';
+  document.querySelectorAll('.mix-btn').forEach(b=>b.classList.toggle('active', b.dataset.amb==='none'));
+}
+document.querySelectorAll('.mix-btn').forEach(b=>b.addEventListener('click',()=>setAmbient(b.dataset.amb)));
+$('ambientVol').addEventListener('input',e=>{
+  ambientVol=+e.target.value/100;
+  if(ambientGainNode) ambientGainNode.gain.value = ambientTargetGain();
+});
+
+/* ===== 공유하기 ===== */
+function buildShareText(){
+  const parts=[];
+  if(currentWish) parts.push(`✦ 내 소원: "${currentWish}"`);
+  if(selected) parts.push(`추천 주파수: ${selected.title} ${selected.hz}Hz`);
+  if(lastTarotPicks.length) parts.push('타로 '+lastTarotPicks.map((p,i)=>`${tarotPositions[i]}-${p.card.name}(${p.reversed?'역':'정'})`).join(', '));
+  parts.push('— WISH FREQUENCY ✦ 소원을 정하고, 주파수를 켜세요.');
+  return parts.join('\n');
+}
+async function shareWish(){
+  const text=buildShareText();
+  try{
+    if(navigator.share){ await navigator.share({title:'WISH FREQUENCY', text}); }
+    else { await navigator.clipboard.writeText(text); toast('공유 문구를 복사했어요 ✦'); }
+  }catch(e){
+    if(e.name==='AbortError') return;
+    try{ await navigator.clipboard.writeText(text); toast('공유 문구를 복사했어요 ✦'); }
+    catch(_){ toast('이 브라우저는 공유를 지원하지 않아요.'); }
+  }
+}
+async function shareTalisman(){
+  const url=$('talismanImg').src; const text=buildShareText();
+  try{
+    const blob=await (await fetch(url)).blob();
+    const file=new File([blob],'소원부적.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'소원 부적', text});
+    } else if(navigator.share){
+      await navigator.share({title:'소원 부적', text});
+    } else {
+      try{ await navigator.clipboard.writeText(text); toast('공유 문구를 복사했어요. 이미지는 저장해서 공유해주세요 ✦'); }
+      catch(_){ toast('저장 후 공유해주세요 ✦'); }
+    }
+  }catch(e){ if(e.name!=='AbortError') toast('공유를 지원하지 않는 환경이에요. 저장해서 공유해주세요.'); }
+}
+$('shareBtn').addEventListener('click', shareWish);
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   if(!$('affirmModal').classList.contains('hidden')) closeAffirmation();

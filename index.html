@@ -66,6 +66,16 @@
           <button id="playBtn" class="play-btn">▶</button>
           <button id="favoriteBtn" class="round-btn">♡</button>
         </div>
+        <div class="ambient-mixer">
+          <div class="mixer-top"><span class="mixer-label">🌧️ 배경 사운드</span><button id="shareBtn" class="share-btn">🔗 공유</button></div>
+          <div class="mixer-btns">
+            <button class="mix-btn active" data-amb="none">없음</button>
+            <button class="mix-btn" data-amb="rain">빗소리</button>
+            <button class="mix-btn" data-amb="waves">파도</button>
+            <button class="mix-btn" data-amb="noise">화이트노이즈</button>
+          </div>
+          <label class="mixer-vol-row"><span>볼륨</span><input id="ambientVol" type="range" min="0" max="100" value="45" /></label>
+        </div>
       </div>
     </section>
 
@@ -116,6 +126,7 @@
       <span class="modal-eyebrow">✦ WISH TALISMAN</span>
       <img id="talismanImg" class="talisman-img" alt="소원 부적 카드" />
       <a id="talismanDownload" class="affirm-read-btn talisman-save" download>이미지 저장하기 ⬇</a>
+      <button id="talismanShare" class="affirm-close-btn talisman-share">공유하기 🔗</button>
       <button id="talismanCloseBtn" class="affirm-close-btn">닫기</button>
     </div>
   </div>
